@@ -8,6 +8,7 @@ Before building data pipelines, understanding the two fundamental building block
 ---
 
 ## 1. Core Anatomy of a DataFrame
+
 A DataFrame is a 2-dimensional labeled data structure with three core components:
 <br>
 
@@ -32,6 +33,7 @@ A DataFrame is a 2-dimensional labeled data structure with three core components
 ---
 
 ## 1.5. Basic DataFrame Creation in Python
+
 Before utilizing any inspection properties, the DataFrame must be initialized in memory. The standard initialization syntax requires importing the library and passing a compatible data structure (such as a dictionary) directly into the constructor.
 
 ```python
@@ -62,9 +64,11 @@ Before utilizing any inspection properties, the DataFrame must be initialized in
 ---
 
 ## 2. Structural Inspection Properties
+
 In data engineering pipelines, the primary step after loading any dataset is inspecting its shape and data types (`dtypes`). Pandas provides three basic properties to complete this check instantly without altering the underlying data.
 
 ### Checking Table Shape (`df.shape`)
+
 Returns a tuple containing the number of rows and columns `(rows, columns)`.
 
 ```python
@@ -83,6 +87,7 @@ Returns a tuple containing the number of rows and columns `(rows, columns)`.
 (3, 2)
 
 ### Viewing Data Types (`df.dtypes`)
+
 This property returns the data type of each independent column. It is used to verify if columns parsed correctly (e.g., numbers read as integers or floats rather than text objects).
 
 ```python
@@ -106,6 +111,7 @@ This property returns the data type of each independent column. It is used to ve
 > When running `df.dtypes`, the final line `dtype: object` represents the data type of the output Series object itself, because Pandas returns the column data types as a text-based Series. It does not indicate that the underlying dataset columns are broken.
 
 ### Getting the Full Summary (`df.info()`)
+
 This method prints a comprehensive structural breakdown of the DataFrame. It shows you the memory footprint, non-null counts, and data types all in one place.
 
 ```python
@@ -144,6 +150,7 @@ The breakdown includes:
 ## 3. Pandas Ingestion & Structural Mapping Guide
 
 ### 1. Dictionary of Lists (Column-Oriented Mapping)
+
 When passing a dictionary of lists, Pandas constructs the table **column by column**. Each key maps to an independent vertical vector.
 
 #### Raw Data Input
@@ -171,7 +178,7 @@ When passing a dictionary of lists, Pandas constructs the table **column by colu
 
 ### 2. List of Dictionaries (Row-Oriented Mapping)
 
-When passing a list of dictionaries, Pandas constructs the table row by row. Each dictionary block within the array is processed as a complete horizontal record.
+When passing a list of dictionaries, Pandas constructs the table **row by row**. Each dictionary block within the array is processed as a complete horizontal record.
 
 #### Raw Data Input
 
