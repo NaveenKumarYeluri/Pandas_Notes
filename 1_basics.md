@@ -12,11 +12,13 @@ Before building data pipelines, understanding the two fundamental building block
 A DataFrame is a 2-dimensional labeled data structure with three core components:
 <br>
 
-| Index | id | city |
-| :--- | :--- | :--- |
-| **0** | 101 | Mumbai |
-| **1** | 102 | Delhi |
-| **2** | 103 | Noida |
+```
+    | Index | id | city |
+    | :--- | :--- | :--- |
+    | **0** | 101 | Mumbai |
+    | **1** | 102 | Delhi |
+    | **2** | 103 | Noida |
+```
 
 * **The Index:** The horizontal row labels (defaults to `0, 1, 2...` if not specified). It acts like a row address.
 * **The Columns:** The vertical labels representing your data fields.
@@ -24,17 +26,21 @@ A DataFrame is a 2-dimensional labeled data structure with three core components
 
 ### Anatomy Example
 
-| Component Type | Index Label | Column: `id` | Column: `city` |
-| :--- | :--- | :--- | :--- |
-| **Row 0** | `0` | 101 | Mumbai *(Data Cell)* |
-| **Row 1** | `1` | 102 | Delhi |
-| **Row 2** | `2` | 103 | Noida |
+```
+    | Component Type | Index Label | Column: `id` | Column: `city` |
+    | :--- | :--- | :--- | :--- |
+    | **Row 0** | `0` | 101 | Mumbai *(Data Cell)* |
+    | **Row 1** | `1` | 102 | Delhi |
+    | **Row 2** | `2` | 103 | Noida |
+```
 
 ---
 
 ## 1.5. Basic DataFrame Creation in Python
 
 Before utilizing any inspection properties, the DataFrame must be initialized in memory. The standard initialization syntax requires importing the library and passing a compatible data structure (such as a dictionary) directly into the constructor.
+
+**Example:**
 
 ```python
     # Step 1: Import the Pandas library (aliased as 'pd' by convention)
@@ -52,14 +58,16 @@ Before utilizing any inspection properties, the DataFrame must be initialized in
     # Step 4: Check output
     print(df)
 ```
+
 **Output:**
 <br>
-
-|       | id   | city   |
-| :---  | :--- | :---   |
-| **0** | 101  | Mumbai |
-| **1** | 102  | Delhi  |
-| **2** | 103  | Noida  |
+```
+    |       | id   | city   |
+    | :---  | :--- | :---   |
+    | **0** | 101  | Mumbai |
+    | **1** | 102  | Delhi  |
+    | **2** | 103  | Noida  |
+```
 
 ---
 
@@ -70,6 +78,8 @@ In data engineering pipelines, the primary step after loading any dataset is ins
 ### Checking Table Shape (`df.shape`)
 
 Returns a tuple containing the number of rows and columns `(rows, columns)`.
+
+**Example:**
 
 ```python
     import pandas as pd
@@ -82,13 +92,18 @@ Returns a tuple containing the number of rows and columns `(rows, columns)`.
     
     print(df.shape)
 ```
+
 **Output:**
 
-(3, 2)
-
+```
+    (3, 2)
+```
+    
 ### Viewing Data Types (`df.dtypes`)
 
 This property returns the data type of each independent column. It is used to verify if columns parsed correctly (e.g., numbers read as integers or floats rather than text objects).
+
+**Example:**
 
 ```python
     import pandas as pd
@@ -101,18 +116,23 @@ This property returns the data type of each independent column. It is used to ve
     
     print(df.dtypes)
 ```
+
 **Output:**
 
+```
     id       int64
     city    object
     dtype: object
-    
+``` 
+   
 > **💡 Understanding the Output:**
 > When running `df.dtypes`, the final line `dtype: object` represents the data type of the output Series object itself, because Pandas returns the column data types as a text-based Series. It does not indicate that the underlying dataset columns are broken.
 
 ### Getting the Full Summary (`df.info()`)
 
 This method prints a comprehensive structural breakdown of the DataFrame. It shows you the memory footprint, non-null counts, and data types all in one place.
+
+**Example:**
 
 ```python
     import pandas as pd
@@ -125,8 +145,10 @@ This method prints a comprehensive structural breakdown of the DataFrame. It sho
     
     df.info()
 ```
+
 **Output:**
 
+```
     <class 'pandas.core.frame.DataFrame'>
     RangeIndex: 3 entries, 0 to 2
     Data columns (total 2 columns):
@@ -137,6 +159,7 @@ This method prints a comprehensive structural breakdown of the DataFrame. It sho
     dtypes: int64(1), object(1)
     memory usage: 180.0+ bytes
     None
+```
 
 The breakdown includes:
 
@@ -155,6 +178,8 @@ When passing a dictionary of lists, Pandas constructs the table **column by colu
 
 #### Raw Data Input
 
+**Example:**
+
 ```python
     import pandas as pd
 
@@ -164,13 +189,16 @@ When passing a dictionary of lists, Pandas constructs the table **column by colu
     }
     df = pd.DataFrame(data)
 ```
+
 **Output:**
 
-| Index | id | city |
-| :--- | :--- | :--- |
-| **0** | 101 | Mumbai |
-| **1** | 102 | Delhi |
-| **2** | 103 | Noida |
+```
+    | Index | id | city |
+    | :--- | :--- | :--- |
+    | **0** | 101 | Mumbai |
+    | **1** | 102 | Delhi |
+    | **2** | 103 | Noida |
+```
 
 > **⚠️ The Length Error Rule:** If `'city'` had a 4th element `['Mumbai', 'Delhi', 'Noida', 'Goa']`, alignment with the 3-element `'id'` column fails because the structure cannot safely balance mismatched vectors. It terminates immediately with `ValueError: All arrays must be of the same length`.
 
@@ -182,6 +210,8 @@ When passing a list of dictionaries, Pandas constructs the table **row by row**.
 
 #### Raw Data Input
 
+**Example:**
+
 ```python
     import pandas as pd
 
@@ -192,12 +222,15 @@ When passing a list of dictionaries, Pandas constructs the table **row by row**.
     ]
     df = pd.DataFrame(data)
 ```
+
 **Output:**
 
-| Index | id | city |
-| :--- | :--- | :--- |
-| **0** | 101 | Mumbai |
-| **1** | 102 | Delhi |
-| **2** | 103 | `NaN` |
-
+```
+    | Index | id | city |
+    | :--- | :--- | :--- |
+    | **0** | 101 | Mumbai |
+    | **1** | 102 | Delhi |
+    | **2** | 103 | `NaN` |
+```
+    
 > **💡 The Auto-Fill Rule:** If a specific row dictionary lacks a key found elsewhere in the schema, Pandas automatically appends a `NaN`(Not a Number) placeholder to that cell coordinate to preserve the 2D grid structure.
