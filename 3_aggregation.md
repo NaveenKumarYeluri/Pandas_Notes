@@ -160,6 +160,59 @@ To compute multiple distinct statistical properties at the same time—such as c
     mumbai  800   400.0      2
 ```
 
+### Advanced Multi-Column Aggregation (Dictionary Mapping)
+
+To execute entirely different statistical calculations across different target columns during a single groupby step, a Python dictionary can be passed to the `.agg()` method. The dictionary keys define the target columns, and the values specify the operation to apply.
+
+Additionally, to prevent the output columns from using generic names like `sum` or `mean`, **Named Aggregation** can be used to explicitly declare new column handles.
+
+#### 1. Dictionary Syntax Pattern
+
+```python
+    summary_df = df.groupby('grouping_column').agg({
+        'numeric_col_A': 'sum',
+        'numeric_col_B': 'mean'
+    })
+```
+
+#### 2. Named Aggregation Syntax Pattern
+
+```python
+    summary_df = df.groupby('grouping_column').agg(
+        new_sum_column=('numeric_col_A', 'sum'),
+        new_avg_column=('numeric_col_B', 'mean')
+    )
+```
+
+**Example:**
+
+```python
+    import pandas as pd
+
+    catalog = {
+        'category': ['Electronics', 'Accessories', 'Accessories', 'Electronics'],
+        'stock_count': [15, 120, 85, 40],
+        'unit_price': [75000, 1200, 3500, 45000]
+    }
+    df_catalog = pd.DataFrame(catalog)
+
+    # Apply unique operations per column using Named Aggregation
+    metrics = df_catalog.groupby('category').agg(
+        total_stock=('stock_count', 'sum'),
+        average_price=('unit_price', 'mean')
+    )
+    print(metrics)
+```
+
+**Output:**
+
+```
+                total_stock  average_price
+    category                               
+    Accessories          205         2350.0
+    Electronics           55        60000.0
+```
+
 ---
 
 ## 5. Flattening the Layout (`.reset_index()`)
