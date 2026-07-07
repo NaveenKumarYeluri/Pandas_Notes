@@ -45,9 +45,9 @@ The `pd.merge()` function executes relational database join operations identical
 **Output:**
 
 ```
-    emp_id    name      dept
-    0     101  Naveen  Data Eng
-    1     102   Rahul    DevOps
+          emp_id    name     dept
+    0     101       Naveen   Data Eng
+    1     102       Rahul    DevOps
 ```
 
 ---
@@ -72,10 +72,10 @@ If the intent is to track all registered employees regardless of whether they ha
 **Output:**
 
 ```
-       emp_id    name      dept
-    0     101  Naveen  Data Eng
-    1     102   Rahul    DevOps
-    2     103   Priya       NaN
+          emp_id    name        dept
+    0     101       Naveen      Data Eng
+    1     102       Rahul       DevOps
+    2     103       Priya       NaN
 ```
 
 ---
