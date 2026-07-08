@@ -18,19 +18,19 @@ When data is loaded from JSON payloads or CSV text files, date columns default t
 
 ```python
     import pandas as pd
-
+    
     data = {
         'tx_id': [801, 802, 803],
         'created_at': ['2026-07-01 10:15:00', '2026-07-02 11:30:22', '2026-07-03 14:05:10']
     }
     df = pd.DataFrame(data)
-
+    
     print("--- Before Conversion ---")
     print(df.dtypes)
-
+    
     # Cast the text objects into true datetime metrics
     df['created_at'] = pd.to_datetime(df['created_at'])
-
+    
     print("\n--- After Conversion ---")
     print(df.dtypes)
 ```
@@ -69,18 +69,18 @@ Once a column has been transformed into a `datetime64[ns]` data type, Pandas unl
 
 ```python
     import pandas as pd
-
+    
     data = {
         'log_id': [501, 502],
         'timestamp': pd.to_datetime(['2026-01-15 08:30:00', '2026-07-07 18:45:12'])
     }
     df = pd.DataFrame(data)
-
+    
     # Derive categorical dimensions for downstream data warehouse queries
     df['extracted_year'] = df['timestamp'].dt.year
     df['extracted_month'] = df['timestamp'].dt.month
     df['weekday'] = df['timestamp'].dt.day_name()
-
+    
     print(df)
 ```
 
@@ -116,9 +116,9 @@ Filtering records based on chronological time windows uses the exact same boolea
 **Output**
 
 ```
-   tx_id       date
-1   1002 2026-07-02
-2   1003 2026-07-06
+       tx_id       date
+    1   1002 2026-07-02
+    2   1003 2026-07-06
 ```
 
 ## 4. Time-Series Aggregations (Temporal GroupBy)
@@ -141,12 +141,13 @@ By combining date property extraction blocks with the segmented `.groupby()` arc
 
     # Step 2: Group rows by month and sum the numeric values
     monthly_financials = df.groupby('tx_month')['amount'].sum().reset_index()
+    print(monthly_financials)
 ```
 
 **Output:**
 
 ```
-   tx_month  amount
-0         1    4700
-1         2    5700
+       tx_month  amount
+    0         1    4700
+    1         2    5700
 ```

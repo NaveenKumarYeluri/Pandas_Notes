@@ -141,3 +141,34 @@ Unlike `.merge()`, which is called directly on a DataFrame instance, `pd.concat(
 ```
 
 > **⚠️ Critical Design Rule:** When vertical DataFrames are stacked, their original individual row index positions (`0, 1...`) are completely preserved. This results in duplicate row labels, as shown in the "Stacked" output. Applying `.reset_index(drop=True)` directly after concatenation is a mandatory data engineering step to restore standard structural alignment.
+---
+
+## 3. Advanced Memory Alignment (`.copy()`)
+
+When isolating a subset of a DataFrame using a boolean filter or slice, Pandas does not immediately allocate fresh memory blocks to build a brand-new independent table. Instead, it creates a **View** pointing directly back to those specific row coordinates inside the original master table.
+
+If an operation tries to modify or add a new column directly onto that filtered subset variable, Pandas may trigger an operational alert called a `SettingWithCopyWarning`. This happens because the system cannot verify if the modification is intended to alter the source master table or just the isolated segment.
+
+### The `.copy()` Solution
+
+Applying the `.copy()` method explicitly forces Pandas to clone the structural data rows into an entirely separate, standalone DataFrame in memory. This disconnects the subset from the original master table, allowing safe column additions and modifications.
+
+#### Incorrect Pipeline Execution (Triggers Warning/Leaks)
+
+```python
+    # Creates a view pointing to the source rows
+    df_filtered = df_raw[df_raw["execution_time"] >= "2026-07-07"]
+    
+    # Adding a column to a view triggers a SettingWithCopyWarning
+    df_filtered["start_hour"] = df_filtered["execution_time"].dt.hour
+```
+
+#### Correct Pipeline Execution (Clean Standalone Table)
+
+```python
+    # Clones the data records explicitly into fresh memory space
+    df_filtered = df_raw[df_raw["execution_time"] >= "2026-07-07"].copy()
+    
+    # Safely modifies the independent table structure
+    df_filtered["start_hour"] = df_filtered["execution_time"].dt.hour
+```
