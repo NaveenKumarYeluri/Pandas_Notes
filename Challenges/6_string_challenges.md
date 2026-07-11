@@ -26,6 +26,8 @@ This document contains six progressive data engineering challenges designed to t
 2. Force the entire text vector into strict **uppercase** lettering.
 3. Save the finalized strings into a new column named `cluster_clean` and print the table.
 
+### My Solution:
+
 ```python
     import pandas as pd
 
@@ -79,6 +81,8 @@ This document contains six progressive data engineering challenges designed to t
 1. Use a vectorized string method to search for the substring `'/home/user/admin/'` inside the `file_path` column.
 2. Replace that explicit path segment with the generalized variable string `'`$CONF_DIR/'`'`.
 3. Overwrite the `file_path` column with the updated configurations.
+
+### My Solution:
 
 ```python
     import pandas as pd
@@ -142,6 +146,8 @@ This document contains six progressive data engineering challenges designed to t
 1. Apply a vectorized string filtering method to evaluate if the text inside the `error_msg` column contains the phrase `'CRITICAL'`.
 2. Build a row mask using that evaluation to isolate the critical tickets into a separate variable named `df_critical_alerts` and print it.
 
+### My Solution:
+
 ```python
     import pandas as pd
 
@@ -191,6 +197,8 @@ This document contains six progressive data engineering challenges designed to t
 
 1. Use positional character slicing via `.str[...]` to isolate the **first 4 characters** of each record inside the `composite_code` column.
 2. Store these isolated 4-letter regional flags inside a new column named `geo_prefix`.
+
+### My Solution:
 
 ```python
     import pandas as pd
@@ -243,6 +251,8 @@ This document contains six progressive data engineering challenges designed to t
 2. Use the structural `.str.get()` method to extract *only* the middle component (the environment state sitting at list index `1`).
 3. Store this extracted element vector inside a new column named `env_tier`.
 
+### My Solution:
+
 ```python
     import pandas as pd
 
@@ -292,6 +302,8 @@ This document contains six progressive data engineering challenges designed to t
 3. **Filter System Rejects:** Build a text mask using a string method to detect any rows where the `legacy_status` column contains the phrase `'SYSTEM_ERR'`. **Drop** these rejected rows from your pipeline subset entirely.
 4. **Standardize Status Indicators:** On the remaining valid rows, use `.str.replace()` to strip out the redundant `'STATUS_'` prefix from the text elements in the `legacy_status` column, leaving only raw indicators like `'ACTIVE_VERIFIED'` or `'PENDING_RETRY'`.
 5. Drop the original `full_name_raw` and `meta_tag` columns. Print the final cleaned master DataFrame grid.
+
+### My Solution:
 
 ```python
     import pandas as pd
