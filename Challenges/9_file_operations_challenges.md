@@ -29,13 +29,29 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    report_data = {
+        "sku_code": ["SKU-101", "SKU-102", "SKU-103"],
+        "inventory_count": [1500, 420, 890],
+        "valuation_usd": [45000.00, 12600.00, 31150.00],
+    }
+    df_report = pd.DataFrame(report_data)
+
+    df_report.to_csv(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files"
+        + "/warehouse_report.csv",
+        index=False,
+    )
 ```
 
 ### My Output Verification:
 
 ```
-
+    sku_code    inventory_count valuation_usd
+    SKU-101     1500            45000
+    SKU-102     420             12600
+    SKU-103     890             31150
 ```
 
 ---
@@ -64,13 +80,28 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    asset_data = {
+        "asset_id": ["SRV-99", "SRV-100"],
+        "description": ["Primary DB Server, Mumbai", "Backup DB Server, Delhi"],
+    }
+    df_assets = pd.DataFrame(asset_data)
+
+    df_assets.to_csv(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/"
+        + "hardware_inventory.txt",
+        index=False,
+        sep="|",
+    )
 ```
 
 ### My Output Verification:
 
 ```
-
+    asset_id|description
+    SRV-99|Primary DB Server, Mumbai
+    SRV-100|Backup DB Server, Delhi
 ```
 
 ---
@@ -99,13 +130,31 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    payload_data = {"worker_id": [4001, 4002], "status_flag": ["ONLINE", "MAINTENANCE"]}
+    df_payload = pd.DataFrame(payload_data)
+
+    df_payload.to_json(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/worker_stream.json",
+        orient="records",
+        indent=4,
+    )
 ```
 
 ### My Output Verification:
 
 ```
-
+    [
+        {
+            "worker_id":4001,
+            "status_flag":"ONLINE"
+        },
+        {
+            "worker_id":4002,
+            "status_flag":"MAINTENANCE"
+        }
+    ]
 ```
 
 ---
@@ -134,13 +183,27 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    df_test = pd.DataFrame({"metric_id": ["M-01", "M-02"], "value": [99.4, 88.1]})
+
+    df_test.to_csv("~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/trap_experiment.csv")
+
+    df_loaded = pd.read_csv(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/trap_experiment.csv"
+    )
+    print(df_loaded)
+    print("\nWe have extra column (Unnamed: 0) which is not part of our original DF.")
 ```
 
 ### My Output Verification:
 
 ```
+       Unnamed: 0 metric_id  value
+    0           0      M-01   99.4
+    1           1      M-02   88.1
 
+    We have extra column (Unnamed: 0) which is not part of our original DF.
 ```
 
 ---
@@ -169,13 +232,33 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    chart_data = {"axis_x": ["Jan", "Feb", "Mar"], "axis_y": [120, 450, 310]}
+    df_chart = pd.DataFrame(chart_data)
+
+    df_chart.to_json(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/dashboard_chart.json",
+        orient="columns",
+        indent=4,
+    )
 ```
 
 ### My Output Verification:
 
 ```
-
+    {
+        "axis_x":{
+            "0":"Jan",
+            "1":"Feb",
+            "2":"Mar"
+        },
+        "axis_y":{
+            "0":120,
+            "1":450,
+            "2":310
+        }
+    }
 ```
 
 ---
@@ -217,12 +300,66 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
+    import numpy as np
 
+    raw_ingestion = {
+        "transaction_id": [88001, 88002, 88003, 88004, 88005],
+        "region_tag": [" mum_prod ", "del_test ", " mum_prod", " noid_prod ", "mum_REJECT"],
+        "data_gb_str": ["150", np.nan, "420", "85", "999"],
+        "latency_ms": ["0.125", "0.045", "0.008", "0.015", "0.999"],
+        "internal_token": ["x-11", "x-22", "x-33", "x-44", "x-55"],
+    }
+    df_raw_pipeline = pd.DataFrame(raw_ingestion)
+
+    mask = ~df_raw_pipeline["region_tag"].str.contains("REJECT")
+    df_raw_pipeline = df_raw_pipeline[mask]
+    df_raw_pipeline = df_raw_pipeline.dropna(subset="data_gb_str")
+    df_raw_pipeline["region_tag"] = df_raw_pipeline["region_tag"].str.strip().str.upper()
+
+    our_datatypes = {"data_gb_str": "int", "latency_ms": "float64"}
+    df_raw_pipeline = df_raw_pipeline.astype(our_datatypes)
+    df_raw_pipeline = df_raw_pipeline.drop(columns="internal_token").reset_index(drop=True)
+
+    df_raw_pipeline.to_csv(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/clean_production_data.csv",
+        index=False,
+    )
+
+    df_raw_pipeline.to_json(
+        "~/Code/AWS_Learning/0_AWS Practice/0_Pandas/Output_Files/clean_production_stream.json",
+        orient="records",
+        indent=4,
+    )
 ```
 
 ### My Output Verification:
 
 ```
+    transaction_id,region_tag,data_gb_str,latency_ms
+    88001,MUM_PROD,150,0.125
+    88003,MUM_PROD,420,0.008
+    88004,NOID_PROD,85,0.015
 
+    [
+        {
+            "transaction_id":88001,
+            "region_tag":"MUM_PROD",
+            "data_gb_str":150,
+            "latency_ms":0.125
+        },
+        {
+            "transaction_id":88003,
+            "region_tag":"MUM_PROD",
+            "data_gb_str":420,
+            "latency_ms":0.008
+        },
+        {
+            "transaction_id":88004,
+            "region_tag":"NOID_PROD",
+            "data_gb_str":85,
+            "latency_ms":0.015
+        }
+    ]
 ```
 
