@@ -24,14 +24,10 @@ Pandas mirrors the standard join behaviors found in relational SQL databases:
 
 * **Behavior:** Retains a row *only* if the join key exists in **both** the left and right DataFrames. Any unmatched rows from either side are discarded.
 
-
-
 ### Pattern B: `how='left'`
 
 * **Behavior:** Preserves every single row from the Left DataFrame. If a matching key is missing from the Right DataFrame, it appends empty null parameters (`NaN`) across the right-side columns.
 * **Best Used For:** Enriching a master transaction table with descriptive lookup dimensions without losing financial rows.
-
-
 
 ### Pattern C: `how='right'`
 

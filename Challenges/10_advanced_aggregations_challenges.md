@@ -353,15 +353,16 @@ This document contains six progressive data engineering challenges designed to t
         "internal_token": ["t-1", "t-2", "t-3", "t-4", "t-5"],
     }
     df_raw_cube = pd.DataFrame(raw_transactions)
+
     mask = ~df_raw_cube["cluster_zone"].str.contains("REJECT")
     df_raw_cube = df_raw_cube[mask]
-    df_raw_cube = df_raw_cube.dropna(subset="cost_str")
+    df_raw_cube = df_raw_cube.dropna(subset=["cost_str"])
     df_raw_cube["cluster_zone"] = df_raw_cube["cluster_zone"].str.strip().str.upper()
 
     type_map = {"cost_str": "float64", "processing_hours": "float64"}
     df_raw_cube = df_raw_cube.astype(type_map)
 
-    df_raw_cube = df_raw_cube.drop(axis=1, columns="internal_token").reset_index(drop=True)
+    df_raw_cube = df_raw_cube.drop(columns="internal_token").reset_index(drop=True)
     print("Our updated DF:\n", df_raw_cube, "\n")
 
     df_metrics = (
@@ -377,28 +378,25 @@ This document contains six progressive data engineering challenges designed to t
         values="cost_str",
         fill_value=0.0,
     ).reset_index()
+
     df_pivot.columns.name = None
-    print("Out Pivot:\n", df_pivot)
+    print("Our Flattened Pivot Matrix:\n", df_pivot)
 ```
 
 ### My Output Verification:
 
 ```
-    Our updated DF:
-        tx_id cluster_zone  cost_str  processing_hours
-    0   9001     MUM_PROD   1200.50               2.5
-    1   9003     MUM_PROD   4500.00               4.0
-    2   9004    NOID_PROD    850.25               0.8 
+    Unpivot data:
+        year   env  cost
+    0  2025  PROD  5000
+    1  2025   DEV  1200
+    2  2026  PROD  7500
+    3  2026   DEV  1800
+    4  2027   UAT   900 
 
-    Our GroupBy metrics:
-    cluster_zone  total_spend  avg_hours
-    0     MUM_PROD      5700.50       3.25
-    1    NOID_PROD       850.25       0.80 
-
-    Out Pivot:
-        tx_id  MUM_PROD  NOID_PROD
-    0   9001    1200.5       0.00
-    1   9003    4500.0       0.00
-    2   9004       0.0     850.25
+    env  year     DEV    PROD    UAT
+    0    2025  1200.0  5000.0    NaN
+    1    2026  1800.0  7500.0    NaN
+    2    2027     NaN     NaN  900.0
 ```
 
