@@ -34,13 +34,31 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+import pandas as pd
 
+metrics = {
+    "instance_code": ["SRV-01", "SRV-02", "SRV-03"],
+    "cpu_utilization": [45.2, 88.7, 12.1],
+}
+df_metrics = pd.DataFrame(metrics)
+registry = {
+    "instance_code": ["SRV-01", "SRV-02", "SRV-04"],
+    "department": ["Engineering", "Data_Platform", "Security"],
+}
+df_registry = pd.DataFrame(registry)
+
+df_inner_join = pd.merge(df_metrics, df_registry, on="instance_code", how="inner")
+print(df_inner_join, "\n\n", "SRV-03 and SRV-04 have no matching records in opposite table.")
 ```
 
 ### My Output Verification:
 
 ```
+      instance_code  cpu_utilization     department
+    0        SRV-01             45.2    Engineering
+    1        SRV-02             88.7  Data_Platform 
 
+    SRV-03 and SRV-04 have no matching records in opposite table.
 ```
 
 ---
@@ -76,13 +94,35 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    transactions = {
+        "tx_id": [5001, 5002, 5003],
+        "region_id": ["MUM", "DEL", "NOID_LEGACY"],
+        "amount_usd": [1200.00, 450.50, 85.00],
+    }
+    df_tx = pd.DataFrame(transactions)
+
+    regions = {"region_id": ["MUM", "DEL", "CHN"], "region_name": ["Mumbai", "Delhi", "Chennai"]}
+    df_regions = pd.DataFrame(regions)
+
+    df_enriched_tx = pd.merge(left=df_tx, right=df_regions, on="region_id", how="left")
+    print(
+        df_enriched_tx,
+        "\n\n",
+        "When left table has no matching record on right table then we will have NaN",
+    )
 ```
 
 ### My Output Verification:
 
 ```
+       tx_id    region_id  amount_usd region_name
+    0   5001          MUM      1200.0      Mumbai
+    1   5002          DEL       450.5       Delhi
+    2   5003  NOID_LEGACY        85.0         NaN 
 
+    When left table has no matching record on right table then we will have NaN
 ```
 
 ---
@@ -118,13 +158,29 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    user_profiles = {
+        "account_handle": ["usr_99", "usr_88", "usr_77"],
+        "email": ["naveen@company.com", "amit@company.com", "sara@company.com"],
+    }
+    df_users = pd.DataFrame(user_profiles)
+    storage_usage = {"user_id": ["usr_88", "usr_99", "usr_66"], "allocated_gb": [150, 420, 85]}
+    df_storage = pd.DataFrame(storage_usage)
+
+    df_inner_join = pd.merge(
+        left=df_users, right=df_storage, left_on="account_handle", right_on="user_id", how="inner"
+    )
+
+    print(df_inner_join)
 ```
 
 ### My Output Verification:
 
 ```
-
+      account_handle               email user_id  allocated_gb
+    0         usr_99  naveen@company.com  usr_99           420
+    1         usr_88    amit@company.com  usr_88           150
 ```
 
 ---
@@ -159,13 +215,31 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    active_servers = {
+        "host_id": ["SRV-A", "SRV-B", "SRV-C"],
+        "status": ["ONLINE", "ONLINE", "MAINTENANCE"],
+    }
+    df_hosts = pd.DataFrame(active_servers)
+    billing_records = {
+        "host_id": ["SRV-B", "SRV-C", "SRV-D"],
+        "invoice_usd": [150.00, 320.00, 45.00],
+    }
+    df_billing = pd.DataFrame(billing_records)
+
+    df_reconciliation = pd.merge(left=df_hosts, right=df_billing, on="host_id", how="outer")
+    print(df_reconciliation)
 ```
 
 ### My Output Verification:
 
 ```
-
+      host_id       status  invoice_usd
+    0   SRV-A       ONLINE          NaN --> Missing Alignment Block (No Invoice)
+    1   SRV-B       ONLINE        150.0
+    2   SRV-C  MAINTENANCE        320.0
+    3   SRV-D          NaN         45.0 --> Missing Alignment Block (No Active Host)
 ```
 
 ---
@@ -192,13 +266,23 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
 
+    df_left = pd.DataFrame({"client_code": ["C-01", "C-02"], "balance": [5000, 7500]})
+    df_right = pd.DataFrame({"customer_id": ["C-01", "C-02"], "tier": ["Gold", "Platinum"]})
+
+    df_inner_join = pd.merge(
+        left=df_left, right=df_right, how="inner", left_on="client_code", right_on="customer_id"
+    ).drop(columns="customer_id")
+    print(df_inner_join)
 ```
 
 ### My Output Verification:
 
 ```
-
+      client_code  balance      tier
+    0        C-01     5000      Gold
+    1        C-02     7500  Platinum
 ```
 
 ---
@@ -265,12 +349,78 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
+    import pandas as pd
+    import numpy as np
 
+    # Component 1: Messy transactional records
+    raw_tx = {
+        "tx_id": [9001, 9002, 9003, 9004],
+        "target_node": [" srv_01 ", "srv_02 ", " srv_01", "srv_REJECT"],
+        "data_processed_mb": ["45000", "120000", np.nan, "999999"],
+    }
+    df_raw_tx = pd.DataFrame(raw_tx)
+    # Component 2: Infrastructure region directories
+    raw_nodes = {
+        "node_code": ["SRV_01", "SRV_02", "SRV_03"],
+        "region_name": ["Mumbai", "Delhi", "Noida"],
+    }
+    df_raw_nodes = pd.DataFrame(raw_nodes)
+    # Component 3: Administrative internal team details
+    raw_departments = {
+        "region": ["Mumbai", "Delhi"],
+        "owner_team": ["Data_Platform", "Core_Infra"],
+    }
+    df_raw_dept = pd.DataFrame(raw_departments)
+
+    mask = ~df_raw_tx["target_node"].str.contains("REJECT")
+    df_raw_tx = df_raw_tx[mask]
+    df_raw_tx = df_raw_tx.dropna(axis=0, subset="data_processed_mb")
+    df_raw_tx["target_node"] = df_raw_tx["target_node"].str.strip().str.upper()
+    df_raw_tx["data_processed_mb"] = df_raw_tx["data_processed_mb"].astype("int")
+
+    df_tx_nodes = pd.merge(
+        left=df_raw_tx, right=df_raw_nodes, left_on="target_node", right_on="node_code", how="left"
+    )
+
+    df_tx_nodes_dept = pd.merge(
+        left=df_tx_nodes, right=df_raw_dept, left_on="region_name", right_on="region", how="left"
+    )
+
+    df_tx_nodes_dept = df_tx_nodes_dept.drop(columns=["node_code", "region"]).reset_index(
+        drop=True
+    )
+    print(df_tx_nodes_dept)
+
+    metric_a = (
+        df_tx_nodes_dept.groupby("owner_team")
+        .agg(
+            total_mb_processed=("data_processed_mb", "sum"), total_transactions=("tx_id", "count")
+        )
+        .reset_index()
+    )
+    print("\n", "Metric A:\n", metric_a, "\n")
+
+    metric_b = df_tx_nodes_dept.pivot_table(
+        index="tx_id", columns="region_name", values="data_processed_mb", fill_value=0
+    ).reset_index()
+    metric_b.columns.name = None
+    print(metric_b)
 ```
 
 ### My Output Verification:
 
 ```
+       tx_id target_node  data_processed_mb region_name     owner_team
+    0   9001      SRV_01              45000      Mumbai  Data_Platform
+    1   9002      SRV_02             120000       Delhi     Core_Infra
 
+    Metric A:
+        owner_team  total_mb_processed  total_transactions
+    0     Core_Infra              120000                   1
+    1  Data_Platform               45000                   1 
+
+       tx_id     Delhi   Mumbai
+    0   9001       0.0  45000.0
+    1   9002  120000.0      0.0
 ```
 
