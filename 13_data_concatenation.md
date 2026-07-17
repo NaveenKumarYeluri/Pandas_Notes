@@ -34,7 +34,7 @@ When you stack tables vertically, Pandas will preserve each row's original index
     print(df_all_nodes)
 ```
 
-**Expected Output:**
+**Output:**
 
 ```
        node_id       status
@@ -62,7 +62,7 @@ If you attempt to vertically concatenate two DataFrames that do not have the exa
     print(df_mismatched)
 ```
 
-**Expected Output:**
+**Output:**
 
 ```
         id  temp  humidity
