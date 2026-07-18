@@ -10,6 +10,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### Raw Data Input
 
+```python
     import pandas as pd
 
     job_dump = {
@@ -17,19 +18,41 @@ This document contains six progressive data engineering challenges designed to t
         'execution_start_str': ['2026-07-15 08:30:00', '2026-07-15 09:15:22', '2026-07-15 14:00:05']
     }
     df_jobs = pd.DataFrame(job_dump)
+```
 
 ### Your Tasks:
+
 1. Use `pd.to_datetime()` to parse the `execution_start_str` column into a proper 64-bit nanosecond timestamp vector (`datetime64[ns]`).
 2. Overwrite the original column or save it into a new column handle named `execution_start_clean`.
 3. Print the updated `.dtypes` layout matrix grid to verify the conversion state.
 
 ### My Solution:
-<!-- Write your code or answers below this line -->
 
+```python
+    import pandas as pd
+
+    job_dump = {
+        "job_id": [9001, 9002, 9003],
+        "execution_start_str": [
+            "2026-07-15 08:30:00",
+            "2026-07-15 09:15:22",
+            "2026-07-15 14:00:05",
+        ],
+    }
+    df_jobs = pd.DataFrame(job_dump)
+
+    df_jobs["execution_start_clean"] = pd.to_datetime(df_jobs["execution_start_str"])
+    print(df_jobs.dtypes)
+```
 
 ### My Output Verification:
-<!-- Paste your terminal execution outputs below this line -->
 
+```
+    job_id                            int64
+    execution_start_str              object
+    execution_start_clean    datetime64[ns]
+    dtype: object
+```
 
 ---
 
@@ -39,6 +62,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### Raw Data Input
 
+```python
     import pandas as pd
 
     corrupted_batch = {
@@ -46,19 +70,41 @@ This document contains six progressive data engineering challenges designed to t
         'log_timestamp_raw': ['2026-07-16 11:20:00', 'BAD_ROUTER_LATENCY_DATA', '2026-07-16 11:25:45']
     }
     df_logs = pd.DataFrame(corrupted_batch)
+```
 
 ### Your Tasks:
+
 1. Cast `log_timestamp_raw` into true datetime parameters using `pd.to_datetime()`.
 2. Apply the configuration argument that forces unparseable alphanumeric strings to dissolve into safe null timestamp tracking blocks (`NaT`).
 3. Save the result in place or to a column named `log_timestamp_clean` and print the resulting DataFrame grid.
 
 ### My Solution:
-<!-- Write your code or answers below this line -->
 
+```python
+    import pandas as pd
+
+    corrupted_batch = {
+        "tx_id": [5501, 5502, 5503],
+        "log_timestamp_raw": [
+            "2026-07-16 11:20:00",
+            "BAD_ROUTER_LATENCY_DATA",
+            "2026-07-16 11:25:45",
+        ],
+    }
+    df_logs = pd.DataFrame(corrupted_batch)
+
+    df_logs["log_timestamp_clean"] = pd.to_datetime(df_logs["log_timestamp_raw"], errors="coerce")
+    print(df_logs)
+```
 
 ### My Output Verification:
-<!-- Paste your terminal execution outputs below this line -->
 
+```
+       tx_id        log_timestamp_raw log_timestamp_clean
+    0   5501      2026-07-16 11:20:00 2026-07-16 11:20:00
+    1   5502  BAD_ROUTER_LATENCY_DATA                 NaT
+    2   5503      2026-07-16 11:25:45 2026-07-16 11:25:45
+```
 
 ---
 
@@ -68,24 +114,42 @@ This document contains six progressive data engineering challenges designed to t
 
 ### Raw Data Input
 
+```python
     import pandas as pd
 
     df_scheduler = pd.DataFrame({
         'scheduled_time': pd.to_datetime(['2026-04-12 08:15:00', '2026-07-17 18:45:30'])
     })
+```
 
 ### Your Tasks:
+
 1. Isolate the numerical calendar hours from `scheduled_time` and save them into a new structural layer named `hour_window`.
 2. Extract the textual day name from `scheduled_time` and save it to a column named `weekday_label`.
 3. Print the final layout grid matrix table view.
 
 ### My Solution:
-<!-- Write your code or answers below this line -->
 
+```python
+    import pandas as pd
+
+    df_scheduler = pd.DataFrame(
+        {"scheduled_time": pd.to_datetime(["2026-04-12 08:15:00", "2026-07-17 18:45:30"])}
+    )
+
+    df_scheduler["hour_window"] = df_scheduler["scheduled_time"].dt.hour
+    df_scheduler["weekday_label"] = df_scheduler["scheduled_time"].dt.day_name()
+
+    print(df_scheduler)
+```
 
 ### My Output Verification:
-<!-- Paste your terminal execution outputs below this line -->
 
+```
+           scheduled_time  hour_window weekday_label
+    0 2026-04-12 08:15:00            8        Sunday
+    1 2026-07-17 18:45:30           18        Friday
+```
 
 ---
 
@@ -95,6 +159,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### Raw Data Input
 
+```python
     import pandas as pd
 
     latency_log = {
@@ -103,19 +168,39 @@ This document contains six progressive data engineering challenges designed to t
         'resolved_at': pd.to_datetime(['2026-07-17 08:05:45', '2026-07-17 10:45:15'])
     }
     df_latency = pd.DataFrame(latency_log)
+```
 
 ### Your Tasks:
+
 1. Calculate the processing duration gap by subtracting `queued_at` from `resolved_at`. Save this mapping layer into a column named `processing_duration`.
 2. Use the `.dt` accessor registry on your new duration layer to pull the exact raw elapsed timeframe value converted entirely into standard **seconds** (save to a column named `duration_seconds`).
 3. Print the updated analytical summary grid frame.
 
 ### My Solution:
-<!-- Write your code or answers below this line -->
 
+```python
+    import pandas as pd
+
+    latency_log = {
+        "task_id": ["TASK-A1", "TASK-B2"],
+        "queued_at": pd.to_datetime(["2026-07-17 08:00:00", "2026-07-17 10:15:30"]),
+        "resolved_at": pd.to_datetime(["2026-07-17 08:05:45", "2026-07-17 10:45:15"]),
+    }
+    df_latency = pd.DataFrame(latency_log)
+
+    df_latency["processing_duration"] = df_latency["resolved_at"] - df_latency["queued_at"]
+    df_latency["duration_seconds"] = df_latency["processing_duration"].dt.total_seconds()
+
+    print(df_latency)
+```
 
 ### My Output Verification:
-<!-- Paste your terminal execution outputs below this line -->
 
+```
+       task_id           queued_at         resolved_at processing_duration  duration_seconds
+    0  TASK-A1 2026-07-17 08:00:00 2026-07-17 08:05:45     0 days 00:05:45               345
+    1  TASK-B2 2026-07-17 10:15:30 2026-07-17 10:45:15     0 days 00:29:45              1785
+```
 
 ---
 
@@ -125,6 +210,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### Raw Data Input
 
+```python
     import pandas as pd
 
     server_traffic = {
@@ -132,19 +218,57 @@ This document contains six progressive data engineering challenges designed to t
         'data_transferred_mb': [450, 120, 890, 310]
     }
     df_traffic = pd.DataFrame(server_traffic)
+```
 
 ### Your Tasks:
+
 1. Recast the raw `timestamp_str` text values into true datetime tracking vectors.
 2. Use the `.dt.hour` attribute mapping helper to create a tracking dimension column named `hour_bucket`.
 3. Group your updated DataFrame by `hour_bucket`, then execute an `.agg()` multi-metric calculation block to compute the **sum** of `data_transferred_mb` (rename to `total_mb`) and the absolute **count** of entries (rename to `total_requests`). Reset the index tracks cleanly so your grouping key is fully preserved as a column.
 
 ### My Solution:
-<!-- Write your code or answers below this line -->
 
+```python
+    import pandas as pd
+
+    server_traffic = {
+        "timestamp_str": [
+            "2026-07-15 08:05:00",
+            "2026-07-15 08:42:00",
+            "2026-07-15 09:12:00",
+            "2026-07-15 09:55:00",
+        ],
+        "data_transferred_mb": [450, 120, 890, 310],
+    }
+    df_traffic = pd.DataFrame(server_traffic)
+
+    df_traffic["timestamp_str"] = pd.to_datetime(df_traffic["timestamp_str"])
+    df_traffic["hour_bucket"] = df_traffic["timestamp_str"].dt.hour
+    df_metric = (
+        df_traffic.groupby("hour_bucket")
+        .agg(
+            total_mb=("data_transferred_mb", "sum"),
+            total_requests=("data_transferred_mb", "count"),
+        )
+        .reset_index()
+    )
+    print(df_traffic, "\n")
+    print(df_metric)
+```
 
 ### My Output Verification:
-<!-- Paste your terminal execution outputs below this line -->
 
+```
+            timestamp_str  data_transferred_mb  hour_bucket
+    0 2026-07-15 08:05:00                  450            8
+    1 2026-07-15 08:42:00                  120            8
+    2 2026-07-15 09:12:00                  890            9
+    3 2026-07-15 09:55:00                  310            9 
+
+       hour_bucket  total_mb  total_requests
+    0            8       570               2
+    1            9      1200               2
+```
 
 ---
 
@@ -154,6 +278,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### Raw Data Input
 
+```python
     import pandas as pd
     import numpy as np
 
@@ -181,8 +306,10 @@ This document contains six progressive data engineering challenges designed to t
         'owner_team': ['Data_Platform', 'Core_Infra']
     }
     df_infra = pd.DataFrame(infra_registry)
+```
 
 ### Your Tasks:
+
 1. **Consolidate Split Staging Input Streams:**
    * Vertically concatenate `df_p1` and `df_p2` into a unified master DataFrame named `df_raw_master`. Ensure duplicate row index tracking values are suppressed.
 2. **Apply Vector Cleanse and Inversion Masking:**
@@ -209,8 +336,92 @@ This document contains six progressive data engineering challenges designed to t
    * Flatten the pivot matrix index layout structure cleanly, wipe out the floating axis name metadata parameter artifacts, and print both Target A and Target B processed matrices.
 
 ### My Solution:
-<!-- Write your code or answers below this line -->
 
+```python
+    import pandas as pd
+    import numpy as np
+
+    # Partition 1: Streaming transactions (v1 text payload)
+    p1 = {
+        "tx_id": [44001, 44002],
+        "node_code": [" srv_mumbai ", "srv_delhi "],
+        "start_str": ["2026-07-17 08:15:00", "2026-07-17 09:02:10"],
+        "end_str": ["2026-07-17 08:20:30", "2026-07-17 09:45:00"],
+    }
+    df_p1 = pd.DataFrame(p1)
+
+    # Partition 2: Streaming transactions (v2 payload with text noise & null fields)
+    p2 = {
+        "tx_id": [44003, 44004, 44005],
+        "node_code": [" srv_mumbai", " srv_delhi ", "srv_REJECT"],
+        "start_str": ["2026-07-17 08:45:00", "2026-07-17 14:10:00", "CORRUPT_TIME"],
+        "end_str": ["2026-07-17 09:15:00", np.nan, "CORRUPT_TIME"],
+    }
+    df_p2 = pd.DataFrame(p2)
+
+    # Secondary Lookup Table: Administrative deployment registry
+    infra_registry = {
+        "cluster_id": ["SRV_MUMBAI", "SRV_DELHI"],
+        "owner_team": ["Data_Platform", "Core_Infra"],
+    }
+    df_infra = pd.DataFrame(infra_registry)
+
+    df_raw_master = pd.concat([df_p1, df_p2], axis=0).reset_index(drop=True)
+
+    mask = ~df_raw_master["node_code"].str.contains("REJECT")
+    df_raw_master = df_raw_master[mask]
+    df_raw_master["node_code"] = df_raw_master["node_code"].str.strip().str.upper()
+
+    df_raw_master["start_str"] = pd.to_datetime(df_raw_master["start_str"], errors="coerce")
+    df_raw_master["end_str"] = pd.to_datetime(df_raw_master["end_str"], errors="coerce")
+    df_raw_master = df_raw_master.dropna(subset=["start_str", "end_str"])
+
+    df_raw_master["elapsed_time"] = df_raw_master["end_str"] - df_raw_master["start_str"]
+    df_raw_master["latency_seconds"] = df_raw_master["elapsed_time"].dt.seconds
+    df_raw_master["start_hour_bucket"] = df_raw_master["start_str"].dt.hour
+
+    df_left_join = (
+        pd.merge(
+            left=df_raw_master,
+            right=df_infra,
+            left_on="node_code",
+            right_on="cluster_id",
+            how="left",
+        )
+        .drop(columns="cluster_id")
+        .reset_index(drop=True)
+    )
+
+    target_a = (
+        df_left_join.groupby("owner_team")
+        .agg(
+            avg_latency_sec=("latency_seconds", "mean"),
+            total_processed_tx=("latency_seconds", "count"),
+        )
+        .reset_index()
+    )
+
+    print("Target A Metrics Summary:\n", target_a, "\n")
+
+    target_b = df_left_join.pivot_table(
+        index="tx_id", columns="node_code", values="latency_seconds", fill_value=0.0
+    ).reset_index()
+    target_b.columns.name = None
+
+    print("Target B Dashboard Pivot Matrix:\n", target_b)
+```
 
 ### My Output Verification:
-<!-- Paste your terminal execution outputs below this line -->
+
+```
+    Target A Metrics Summary:
+          owner_team  avg_latency_sec  total_processed_tx
+    0     Core_Infra           2570.0                   1
+    1  Data_Platform           1065.0                   2 
+
+    Target B Dashboard Pivot Matrix:
+       tx_id  SRV_DELHI  SRV_MUMBAI
+    0  44001        0.0       330.0
+    1  44002     2570.0         0.0
+    2  44003        0.0      1800.0
+```
