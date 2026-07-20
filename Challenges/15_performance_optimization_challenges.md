@@ -83,13 +83,23 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```
+    import pandas as pd
+    import numpy as np
 
+    log_dump = {"log_id": [77001, 77002, 77003], "response_code": [200, 500, 404]}
+    df_logs = pd.DataFrame(log_dump)
+
+    df_logs["status_vector"] = np.where(df_logs["response_code"] >= 400, "ERROR", "SUCCESS")
+    print(df_logs)
 ```
 
 ### My Output Verification:
 
 ```
-
+       log_id  response_code status_vector
+    0   77001            200       SUCCESS
+    1   77002            500         ERROR
+    2   77003            404         ERROR
 ```
 
 ---
@@ -123,13 +133,28 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```
+    import pandas as pd
+    import numpy as np
 
+    server_dump = {"request_id": [101, 102, 103, 104], "http_status": [200, 503, 301, 401]}
+    df_server = pd.DataFrame(server_dump)
+
+    df_server["fault_category"] = np.where(
+        df_server["http_status"] >= 400,
+        np.where(df_server["http_status"] >= 500, "SERVER_FAULT", "CLIENT_FAULT"),
+        "REDIRECT_OR_SUCCESS",
+    )
+    print(df_server)
 ```
 
 ### My Output Verification:
 
 ```
-
+       request_id  http_status       fault_category
+    0         101          200  REDIRECT_OR_SUCCESS
+    1         102          503         SERVER_FAULT
+    2         103          301  REDIRECT_OR_SUCCESS
+    3         104          401         CLIENT_FAULT
 ```
 
 ---
@@ -156,13 +181,19 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```
+    import pandas as pd
 
+    # Repetitive structural strings representing server environment spaces
+    env_data = {"env_tag": ["PRODUCTION", "DEVELOPMENT", "STAGING", "PRODUCTION"] * 500}
+    df_env = pd.DataFrame(env_data)
+
+    print("Memory Usage:", df_env.memory_usage(deep=True)["env_tag"], "bytes")
 ```
 
 ### My Output Verification:
 
 ```
-
+    Memory Usage: 117000 bytes
 ```
 
 ---
@@ -189,13 +220,21 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```
+    import pandas as pd
 
+    env_data = {"env_tag": ["PRODUCTION", "DEVELOPMENT", "STAGING", "PRODUCTION"] * 500}
+    df_env = pd.DataFrame(env_data)
+
+    print("Memory Usage Before:", df_env.memory_usage(deep=True)["env_tag"], "bytes")
+    df_env["env_tag"] = df_env["env_tag"].astype("category")
+    print("Memory Usage After:", df_env.memory_usage(deep=True)["env_tag"], "bytes")
 ```
 
 ### My Output Verification:
 
 ```
-
+    Memory Usage Before: 117000 bytes
+    Memory Usage After: 2283 bytes
 ```
 
 ---
@@ -256,11 +295,106 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```
+    import pandas as pd
+    import numpy as np
 
+    # Component Shard 1: First split vertical partition of messy analytics tracking data
+    shard_1 = {
+        "tx_id": [99001, 99002],
+        "node_code": [" srv_mumbai ", "srv_delhi "],
+        "latency_str": ["45.2", "120.8"],
+        "team_tag": ["DATA_PLATFORM", "CORE_INFRA"],
+    }
+    df_shard_1 = pd.DataFrame(shard_1)
+    # Component Shard 2: Second split vertical partition (Contains anomalies & text noise)
+    shard_2 = {
+        "tx_id": [99003, 99004, 99005],
+        "node_code": [" srv_mumbai", " srv_noida ", "srv_REJECT"],
+        "latency_str": ["88.4", "12.1", "9999.9"],
+        "team_tag": ["DATA_PLATFORM", "SECURITY_OPS", "CORE_INFRA"],
+    }
+    df_shard_2 = pd.DataFrame(shard_2)
+
+    df_raw_master = pd.concat([df_shard_1, df_shard_2]).reset_index(drop=True)
+    mask = ~df_raw_master["node_code"].str.contains("REJECT")
+    df_raw_master = df_raw_master[mask]
+    df_raw_master["node_code"] = df_raw_master["node_code"].str.strip().str.upper()
+    df_raw_master["latency_str"] = df_raw_master["latency_str"].astype("float")
+    df_raw_master["performance_tier"] = np.where(
+        df_raw_master["latency_str"] > 100, "HIGH_LATENCY", "NORMAL_LATENCY"
+    )
+    print(
+        "Perf Before for node_code: ",
+        df_raw_master.memory_usage(deep=True)["node_code"],
+        "bytes",
+        "\n",
+    )
+    print(
+        "Perf Before for team_tag: ",
+        df_raw_master.memory_usage(deep=True)["team_tag"],
+        "bytes",
+        "\n",
+    )
+
+    df_raw_master["node_code"] = df_raw_master["node_code"].astype("category")
+    df_raw_master["team_tag"] = df_raw_master["team_tag"].astype("category")
+    print(
+        "Perf After for node_code: ",
+        df_raw_master.memory_usage(deep=True)["node_code"],
+        "bytes",
+        "\n",
+    )
+    print(
+        "Perf After for team_tag: ",
+        df_raw_master.memory_usage(deep=True)["team_tag"],
+        "bytes",
+        "\n",
+    )
+
+    print("Out raw DF:\n", df_raw_master, "\n")
+
+    metric_a = (
+        df_raw_master.groupby("team_tag", observed=True)
+        .agg(avg_latency=("latency_str", "mean"), total_tx=("tx_id", "count"))
+        .reset_index()
+    )
+    print("First Metric:\n", metric_a, "\n")
+
+    target_b = df_raw_master.pivot_table(
+        index="tx_id", columns="node_code", values="latency_str", fill_value=0.0, observed=True
+    ).reset_index()
+    target_b.columns.name = None
+    print("Pivot Table:\n", target_b)
 ```
 
 ### My Output Verification:
 
 ```
+    Perf Before for node_code:  234 bytes 
 
+    Perf Before for team_tag:  244 bytes 
+
+    Perf After for node_code:  287 bytes 
+
+    Perf After for team_tag:  294 bytes 
+
+    Out raw DF:
+       tx_id   node_code  latency_str       team_tag performance_tier
+    0  99001  SRV_MUMBAI         45.2  DATA_PLATFORM   NORMAL_LATENCY
+    1  99002   SRV_DELHI        120.8     CORE_INFRA     HIGH_LATENCY
+    2  99003  SRV_MUMBAI         88.4  DATA_PLATFORM   NORMAL_LATENCY
+    3  99004   SRV_NOIDA         12.1   SECURITY_OPS   NORMAL_LATENCY 
+
+    First Metric:
+            team_tag  avg_latency  total_tx
+    0     CORE_INFRA        120.8         1
+    1  DATA_PLATFORM         66.8         2
+    2   SECURITY_OPS         12.1         1 
+
+    Pivot Table:
+       tx_id  SRV_DELHI  SRV_MUMBAI  SRV_NOIDA
+    0  99001        0.0        45.2        0.0
+    1  99002      120.8         0.0        0.0
+    2  99003        0.0        88.4        0.0
+    3  99004        0.0         0.0       12.1
 ```
