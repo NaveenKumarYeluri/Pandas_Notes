@@ -34,21 +34,21 @@ This document contains six progressive data engineering challenges designed to t
 ### My Solution:
 
 ```python
-import pandas as pd
+    import pandas as pd
 
-metrics = {
-    "instance_code": ["SRV-01", "SRV-02", "SRV-03"],
-    "cpu_utilization": [45.2, 88.7, 12.1],
-}
-df_metrics = pd.DataFrame(metrics)
-registry = {
-    "instance_code": ["SRV-01", "SRV-02", "SRV-04"],
-    "department": ["Engineering", "Data_Platform", "Security"],
-}
-df_registry = pd.DataFrame(registry)
+    metrics = {
+        "instance_code": ["SRV-01", "SRV-02", "SRV-03"],
+        "cpu_utilization": [45.2, 88.7, 12.1],
+    }
+    df_metrics = pd.DataFrame(metrics)
+    registry = {
+        "instance_code": ["SRV-01", "SRV-02", "SRV-04"],
+        "department": ["Engineering", "Data_Platform", "Security"],
+    }
+    df_registry = pd.DataFrame(registry)
 
-df_inner_join = pd.merge(df_metrics, df_registry, on="instance_code", how="inner")
-print(df_inner_join, "\n\n", "SRV-03 and SRV-04 have no matching records in opposite table.")
+    df_inner_join = pd.merge(df_metrics, df_registry, on="instance_code", how="inner")
+    print(df_inner_join, "\n\n", "SRV-03 and SRV-04 have no matching records in opposite table.")
 ```
 
 ### My Output Verification:

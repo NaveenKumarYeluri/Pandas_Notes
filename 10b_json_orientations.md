@@ -25,7 +25,7 @@ Every layout pattern example below is generated using this exact 2x2 data matrix
 * **Behavior:** Maps the top-level keys directly to your column headers. Inside each column key, it nests another dictionary where row index numbers map to individual cell values.
 * **Best Used For:** Standard data storage backups where you want to reconstruct the exact data layout matrix shape upon reload.
 
-**Example Output:**
+**Output:**
 
 ```
     {
@@ -45,7 +45,7 @@ Every layout pattern example below is generated using this exact 2x2 data matrix
 * **Behavior:** Flattens the entire grid structure into a standard Python list of self-contained object dictionaries. Every row transforms into a distinct key-value entry.
 * **Best Used For:** Real-time data pipeline streams, API responses, and importing straight into NoSQL engines like MongoDB or AWS DynamoDB.
 
-**Example Output:**
+**Output:**
 
 ```
     [
@@ -65,7 +65,7 @@ Every layout pattern example below is generated using this exact 2x2 data matrix
 * **Behavior:** Inverts the default columns pattern. The top-level root keys map directly to row index labels, and each index nests a dictionary mapping columns to their respective row values.
 * **Best Used For:** Key-value lookups where you want to query rows quickly by their primary structural row address keys.
 
-**Example Output:**
+**Output:**
 
 ```
     {
@@ -87,7 +87,7 @@ Every layout pattern example below is generated using this exact 2x2 data matrix
 * **Behavior:** Splits the DataFrame layout down into three completely independent, raw list components: columns, index, and data.
 * **Best Used For:** System tracking dashboards or low-overhead network communications where you want to minimize structural text repetitions.
 
-**Example Output:**
+**Output:**
 
 ```
     {
@@ -107,7 +107,7 @@ Every layout pattern example below is generated using this exact 2x2 data matrix
 * **Behavior:** Strips out all column names and structural row labels completely. It drops only the raw row data cell entries as an un-labeled matrix array of lists.
 * **Best Used For:** Supplying clean raw data parameters directly to deep learning array engines or primitive visualization plotting tools.
 
-**Example Output:**
+**Output:**
 
 ```
     [

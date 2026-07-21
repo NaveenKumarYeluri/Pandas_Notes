@@ -28,7 +28,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     raw_tasks = {
@@ -78,7 +78,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     build_tags = {
@@ -127,7 +127,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     audit_dump = {
@@ -136,7 +136,7 @@ This document contains six progressive data engineering challenges designed to t
     }
     df_audit = pd.DataFrame(audit_dump)
 
-    pattern = r"HOST:([a-z-a-z_A-Z]+):(\d+)_"
+    pattern = r"HOST:([a-z-a-z]+)_RESP:(\d+)_"
     df_audit[["host_node", "status_code"]] = df_audit["payload"].str.extract(pattern)
     print(df_audit)
 ```
@@ -144,9 +144,9 @@ This document contains six progressive data engineering challenges designed to t
 ### My Output Verification:
 
 ```
-       log_id                        payload        host_node status_code
-    0    4001  HOST:srv-mumbai_RESP:403_FAIL  srv-mumbai_RESP         403
-    1    4002   HOST:srv-delhi_RESP:500_FAIL   srv-delhi_RESP         500
+       log_id                        payload   host_node status_code
+    0    4001  HOST:srv-mumbai_RESP:403_FAIL  srv-mumbai         403
+    1    4002   HOST:srv-delhi_RESP:500_FAIL   srv-delhi         500
 ```
 
 ---
@@ -174,14 +174,24 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
+    import pandas as pd
 
+    inventory = {"item_id": [1, 2, 3], "raw_token": ["PRD#99-MUM", "DEV_88-DEL", "STG#12-NOD"]}
+    df_inv = pd.DataFrame(inventory)
+
+    pattern = r"([#_]+)(\d+)"
+    df_inv["clean_prefix"] = df_inv["raw_token"].str.replace(pattern, "", regex=True)
+    print(df_inv)
 ```
 
 ### My Output Verification:
 
 ```
-
+       item_id   raw_token clean_prefix
+    0        1  PRD#99-MUM       PRD-MUM
+    1        2  DEV_88-DEL       DEV-DEL
+    2        3  STG#12-NOD       STG-NOD
 ```
 
 ---
@@ -210,14 +220,28 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
+    import pandas as pd
 
+    telemetry = {
+        "metric_id": ["M1", "M2", "M3"],
+        "raw_stream": ["cpu_load:45.2%", "cpu_load:88.75%", "cpu_load:12.0%"],
+    }
+    df_metrics = pd.DataFrame(telemetry)
+
+    pattern = r"([(\d+).(\d+)]+)"
+    df_metrics["utilization_pct"] = df_metrics["raw_stream"].str.extract(pattern)
+    df_metrics["utilization_pct"] = df_metrics["utilization_pct"].astype("float")
+    print(df_metrics)
 ```
 
 ### My Output Verification:
 
 ```
-
+      metric_id       raw_stream  utilization_pct
+    0        M1   cpu_load:45.2%            45.20
+    1        M2  cpu_load:88.75%            88.75
+    2        M3   cpu_load:12.0%            12.00
 ```
 
 ---
@@ -285,12 +309,89 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
+    import pandas as pd
 
+    # Partition 1: Unstructured streaming logs sequence A
+    part_a = {
+        "log_idx": [5001, 5002],
+        "cluster_node": [" srv_mumbai ", "srv_delhi "],
+        "timestamp_str": ["2026-07-20 09:00:00", "2026-07-20 09:05:15"],
+        "unstructured_payload": [
+            "[WARN] code:8801 cost:12.50usd",
+            "[ERROR] code:4402 cost:120.80usd",
+        ],
+    }
+    df_part_a = pd.DataFrame(part_a)
+    # Partition 2: Unstructured streaming logs sequence B (Contains text anomalies
+    # & null tracking targets)
+    part_b = {
+        "log_idx": [5003, 5004, 5005],
+        "cluster_node": [" srv_mumbai", " srv_delhi ", "srv_REJECT"],
+        "timestamp_str": ["2026-07-20 09:12:30", "CORRUPT_TIME", "2026-07-20 09:45:00"],
+        "unstructured_payload": [
+            "[WARN] code:8801 cost:45.00usd",
+            "[WARN] code:9901 cost:8.45usd",
+            "[ERROR] code:9999 cost:999.99usd",
+        ],
+    }
+    df_part_b = pd.DataFrame(part_b)
+
+    df_raw_logs = pd.concat([df_part_a, df_part_b]).reset_index(drop=True)
+    mask = ~df_raw_logs["cluster_node"].str.contains("REJECT")
+    df_raw_logs = df_raw_logs[mask]
+    df_raw_logs["cluster_node"] = df_raw_logs["cluster_node"].str.strip().str.upper()
+    df_raw_logs["timestamp_str"] = pd.to_datetime(df_raw_logs["timestamp_str"], errors="coerce")
+    df_raw_logs = df_raw_logs.dropna(subset=["timestamp_str"])
+
+    # \[([A-Z]+)\] -> Captures log level inside brackets
+    # code:(\d+)   -> Captures explicit integer system code
+    # cost:([\d.]+) -> Captures raw float numeric values cleanly without truncation
+    pattern = r"\[([A-Z]+)\] code:(\d+) cost:([\d.]+)"
+    df_raw_logs[["log_level", "system_code", "billing_cost"]] = df_raw_logs[
+        "unstructured_payload"
+    ].str.extract(pattern)
+
+    df_raw_logs = df_raw_logs.drop(columns=["unstructured_payload"])
+    df_raw_logs["billing_cost"] = df_raw_logs["billing_cost"].astype("float")
+    df_raw_logs[["log_level", "cluster_node"]] = df_raw_logs[["log_level", "cluster_node"]].astype(
+        "category"
+    )
+    df_raw_logs = df_raw_logs.reset_index(drop=True)
+    print(df_raw_logs, "\n")
+
+    target_a = (
+        df_raw_logs.groupby("log_level", observed=True)
+        .agg(total_spend_usd=("billing_cost", "sum"), total_logs=("log_idx", "count"))
+        .reset_index()
+    )
+    print(target_a, "\n")
+
+    target_b = df_raw_logs.pivot_table(
+        index="system_code",
+        columns="cluster_node",
+        values="billing_cost",
+        aggfunc="sum",
+        fill_value=0.0,
+        observed=True,
+    ).reset_index()
+    target_b.columns.name = None
+    print(target_b)
 ```
 
 ### My Output Verification:
 
 ```
+       log_idx cluster_node       timestamp_str log_level system_code  billing_cost
+    0     5001   SRV_MUMBAI 2026-07-20 09:00:00      WARN        8801          12.5
+    1     5002    SRV_DELHI 2026-07-20 09:05:15     ERROR        4402         120.8
+    2     5003   SRV_MUMBAI 2026-07-20 09:12:30      WARN        8801          45.0 
 
+      log_level  total_spend_usd  total_logs
+    0     ERROR            120.8           1
+    1      WARN             57.5           2 
+
+      system_code  SRV_DELHI  SRV_MUMBAI
+    0        4402      120.8        0.00
+    1        8801        0.0        57.5
 ```

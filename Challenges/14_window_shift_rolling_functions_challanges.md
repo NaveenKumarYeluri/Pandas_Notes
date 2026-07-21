@@ -28,7 +28,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     security_logs = {
@@ -77,7 +77,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     gateway_traffic = {"minute": [1, 2, 3, 4, 5], "throughput_mb": [120, 450, 300, 150, 600]}
@@ -126,7 +126,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     billing_stream = {
@@ -175,7 +175,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     cluster_telemetry = {
@@ -226,7 +226,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     task_stream = {
@@ -317,7 +317,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     # Partition A: First sequence of messy telemetry blocks

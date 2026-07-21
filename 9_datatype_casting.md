@@ -38,7 +38,7 @@ The `.astype()` method casts a selected column vector explicitly into an alterna
     print("\n--- Processed Types --- \n", df.dtypes)
 ```
 
-**Expected Output:**
+**Output:**
 
 ```
     --- Baseline Types --- 
@@ -81,7 +81,7 @@ To transform multiple mismatched data streams in a single operational step, pass
     print(df.dtypes)
 ```
 
-**Expected Output:**
+**Output:**
 
 ```
     node_code         int64

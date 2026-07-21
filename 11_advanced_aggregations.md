@@ -61,7 +61,6 @@ The `.pivot_table()` method rotates a DataFrame's layout structure. It transform
 * **`aggfunc`**: The mathematical operation used to combine values (defaults to `'mean'`).
 
 
-
 **Example:**
 
 ```python

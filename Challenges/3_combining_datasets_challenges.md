@@ -26,6 +26,7 @@ This document contains six progressive data engineering challenges designed to t
 ```
 
 ### Your Tasks:
+
 1. Merge `df_users` and `df_sessions` using an inner join based on the shared `user_id` key. Assign the result to `df_active_audit`.
 2. Inspect the final row count. Explain why user `U103` and user `U105` were excluded from the final output grid based on inner join rules.
 
@@ -89,6 +90,7 @@ This document contains six progressive data engineering challenges designed to t
 ```
 
 ### Your Tasks:
+
 1. Perform a left join to combine `df_profiles` with `df_subs` using `user_id` as the join key, ensuring every user from `df_profiles` is preserved.
 2. Observe the missing values generated in the output. What explicit placeholder does Pandas inject into the `tier` column for users who do not have a corresponding record in the subscription table?
 
@@ -150,6 +152,7 @@ This document contains six progressive data engineering challenges designed to t
 ```
 
 ### Your Tasks:
+
 1. Research or look up the `left_on` and `right_on` parameters within the `pd.merge()` documentation.
 2. Execute a single-line horizontal merge combining `df_reg` and `df_pay` by explicitly passing the mismatched column names as keys. 
 
@@ -205,6 +208,7 @@ This document contains six progressive data engineering challenges designed to t
 ```
 
 ### Your Tasks:
+
 1. Concatenate `df_h1` and `df_h2` vertically along the row axis. Assign the output to `df_combined_logs`.
 2. Print the row index labels of `df_combined_logs`. Explain the structural issue with these labels and apply the mandatory index cleanup method to fix them.
 
@@ -272,6 +276,7 @@ This document contains six progressive data engineering challenges designed to t
 ```
 
 ### Your Tasks:
+
 1. Execute a merge operation using an Outer Join mapping the `sku_id` key.
 2. In the resulting summary tracking grid, fill any missing `NaN` cell values with an explicit default integer parameter of `0`.
 
@@ -348,6 +353,7 @@ This document contains six progressive data engineering challenges designed to t
 ```
 
 ### Your Tasks:
+
 1. Enrich the inbound stream: Perform a horizontal merge matching `df_stream` to `df_registry` using a **left join** based on the `merchant_code` key.
 2. Partitioning the columns: Restrict the columns of this newly enriched stream DataFrame to include *only* `tx_id`, `merchant_name`, and `amount`. Drop the code column.
 3. Pipeline Consolidation: Combine the historical archive DataFrame (`df_historical`) and your newly partitioned stream DataFrame vertically into a single master tracking database.

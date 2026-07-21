@@ -21,6 +21,7 @@ This document contains five progressive data engineering challenges designed to 
 ```
 
 ### Your Tasks:
+
 1. Run this code block. Identify the explicit Python error thrown and explain **why** it happens based on the structural design rules of a DataFrame.
 2. Fix the underlying raw data structure manually so it compiles into a valid DataFrame named `df_sensor`.
 3. Change the data type (`dtype`) of the `temperature` column from a float to an integer. Print `df_sensor.dtypes` to verify.
@@ -45,6 +46,7 @@ This document contains five progressive data engineering challenges designed to 
 
 ### My Output Verification:
 
+```
     Before:
     timestamp       object
     temperature    float64
@@ -62,6 +64,8 @@ This document contains five progressive data engineering challenges designed to 
     0  2026-07-01 10:00           22     OK
     1  2026-07-01 10:05           23     OK
     2  2026-07-01 10:10           22   WARN
+```
+
 ---
 
 ## Challenge 2: The E-Commerce Schema Edge-Case (Row-Oriented)
@@ -108,6 +112,7 @@ This document contains five progressive data engineering challenges designed to 
 
 ### My Output Verification:
 
+```
     Check Info of entire DF:
 
     <class 'pandas.core.frame.DataFrame'>
@@ -136,7 +141,9 @@ This document contains five progressive data engineering challenges designed to 
 
 
     order_id  amount coupon
-    1      5002    99.0    NaN
+    1      5002    99.0    NaN    
+```
+
 ---
 
 ## Challenge 3: Advanced Pipeline Sanitation (Complex Filtering)
@@ -158,6 +165,7 @@ This document contains five progressive data engineering challenges designed to 
 ```
 
 ### Your Tasks:
+
 1. Extract a multi-column subset containing *only* `item_sku` and `unit_price`. Assign it to a new variable.
 2. Apply a complex multi-condition row filter to `df_inv` using the `&` (AND) operator to find items that match **both** of these criteria:
    * The `warehouse` must be either **Mumbai** or **Delhi** (utilizing the `.isin()` method).
@@ -199,6 +207,7 @@ This document contains five progressive data engineering challenges designed to 
 
 ### My Output Verification:
 
+```
     item_sku  unit_price
     0   SKU-01        1200
     1   SKU-02        4500
@@ -218,6 +227,8 @@ This document contains five progressive data engineering challenges designed to 
     1    SKU-02
     3    SKU-04
     Name: item_sku, dtype: object
+```
+
 ---
 
 ## Challenge 4: Derived Metric Calculations (Vector Math)
@@ -238,6 +249,7 @@ This document contains five progressive data engineering challenges designed to 
 ```
 
 ### Your Tasks:
+
 1. Add a new computed column named `total_value` by multiplying the `quantity` vector by the `cost_per_unit` vector.
 2. Add a second derived column named `tax_liability` representing a flat **18%** of the computed `total_value` column.
 3. Print the final `df_prod` output table structure to verify both new columns exist.
@@ -262,12 +274,15 @@ This document contains five progressive data engineering challenges designed to 
 
     print(df_prod)  # Question 3
 ```
+
 ### My Output Verification:
 
+```
     prod_id  quantity  cost_per_unit  total_value  tax_liability
     0       10       100           15.0       1500.0          270.0
     1       20       250            8.5       2125.0          382.5
     2       30        80           42.0       3360.0          604.8
+```
 
 ---
 
@@ -277,6 +292,7 @@ This document contains five progressive data engineering challenges designed to 
 
 ### Raw Data Input
 
+```python
     import pandas as pd
 
     raw_stream = [
@@ -286,8 +302,10 @@ This document contains five progressive data engineering challenges designed to 
         {'tx_id': 9904, 'user': 'delta', 'amount': '2100', 'region': 'NOIDA'},
         {'tx_id': 9905, 'user': 'epsilon', 'region': 'DELHI'} # Missing amount field
     ]
+```
 
 ### Your Tasks:
+
 1. Load the stream array into a DataFrame named `df_stream` and evaluate the mismatched types via `.dtypes`.
 2. Clean the missing fields by assigning a temporary default value of `'0'` to any `NaN` values in the `amount` column.
 3. Convert the entire `amount` column into a proper integer data type (`int64`) using `.astype()`.
@@ -332,6 +350,7 @@ This document contains five progressive data engineering challenges designed to 
 
 ### My Output Verification:
 
+```
     tx_id      int64
     user      object
     amount    object
@@ -350,3 +369,4 @@ This document contains five progressive data engineering challenges designed to 
     0   9901  alpha
     1   9902   beta
     3   9904  delta
+```

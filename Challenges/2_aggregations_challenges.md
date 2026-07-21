@@ -22,6 +22,7 @@ This document contains four progressive data engineering challenges designed to 
 ```
 
 ### Your Tasks:
+
 1. Extract and isolate the absolute maximum CPU utilization value found in `avg_cpu_pct`.
 2. Compute the arithmetic mean (average) of the `avg_cpu_pct` vector.
 3. Execute a single bulk inspection method on `df_fleet` that instantly displays count, mean, standard deviation, and percentiles for all numeric columns.

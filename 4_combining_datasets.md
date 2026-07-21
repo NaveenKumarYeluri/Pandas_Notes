@@ -86,6 +86,7 @@ While merging grows a table horizontally by adding columns, concatenation grows 
 
 
 ### Syntax Architecture
+
 Unlike `.merge()`, which is called directly on a DataFrame instance, `pd.concat()` is a top-level Pandas function that accepts a Python **list** of DataFrames to stack.
 
 ```python

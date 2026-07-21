@@ -36,7 +36,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     batch_01 = {
@@ -101,7 +101,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     mumbai_nodes = {
@@ -171,7 +171,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     logs_v1 = {
@@ -233,7 +233,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     source_metrics = pd.DataFrame(
@@ -282,7 +282,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     c1 = pd.DataFrame({"node": ["N1"], "load": [45.2]})
@@ -377,7 +377,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
     import numpy as np
 

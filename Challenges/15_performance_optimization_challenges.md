@@ -28,7 +28,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     log_dump = {"log_id": [77001, 77002, 77003], "response_code": [200, 500, 404]}
@@ -82,7 +82,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
     import numpy as np
 
@@ -132,7 +132,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
     import numpy as np
 
@@ -180,7 +180,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     # Repetitive structural strings representing server environment spaces
@@ -219,7 +219,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
 
     env_data = {"env_tag": ["PRODUCTION", "DEVELOPMENT", "STAGING", "PRODUCTION"] * 500}
@@ -294,7 +294,7 @@ This document contains six progressive data engineering challenges designed to t
 
 ### My Solution:
 
-```
+```python
     import pandas as pd
     import numpy as np
 
