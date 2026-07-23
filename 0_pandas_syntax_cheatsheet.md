@@ -4,139 +4,180 @@ This single-file document serves as a high-density reference sheet for syntax ma
 
 ---
 
-## 1. Vector Manipulation & Column Selection
+## 1. Vector Manipulation, Selection & Regex Mining
 
 ### Select Columns
+
 * **Syntax:** `df[['col1', 'col2']]`
 * **Explanation:** Filters the DataFrame horizontally to extract a targeted subset of column vectors.
 * **Example:** `df_users = df[['account_handle', 'email']]`
 
 ### Element Vector Slicing (`.str.contains()`)
+
 * **Syntax:** `df['column'].str.contains('pattern')`
 * **Explanation:** Generates a boolean mask tracking if text fields contain a specific substring pattern.
 * **Example:** `mask = df['system_code'].str.contains('REJECT')`
 
 ### The Tilde Inversion Mask Operator (`~`)
+
 * **Syntax:** `df[~mask]`
 * **Explanation:** Inverts a boolean condition array to filter out specific target records.
 * **Example:** `df_clean = df[~mask]`
 
-### Vectorized String Trimming (`.str.strip()`)
-* **Syntax:** `df['column'].str.strip()`
-* **Explanation:** Strips away all leading and trailing whitespace characters from text entries.
-* **Example:** `df['region_tag'] = df['region_tag'].str.strip()`
+### Vectorized String Trimming & Casing (`.str.strip()` / `.str.upper()`)
 
-### Vectorized Case Conversion (`.str.upper()`)
-* **Syntax:** `df['column'].str.upper()`
-* **Explanation:** Transforms all text elements in a column vector into strict uppercase lettering.
-* **Example:** `df['region_tag'] = df['region_tag'].str.upper()`
+* **Syntax:** `df['column'].str.strip().str.upper()`
+* **Explanation:** Strips leading/trailing whitespaces and transforms text elements into uppercase.
+* **Example:** `df['region_tag'] = df['region_tag'].str.strip().str.upper()`
+
+### Regular Expression Capture Extraction (`.str.extract()`)
+
+* **Syntax:** `df['column'].str.extract(r'pattern_with_(capture_groups)')`
+* **Explanation:** Uses regex capture groups `()` to mine and split unstructured text patterns directly into distinct columns.
+* **Example:** `df[['level', 'code']] = df['payload'].str.extract(r'\[([A-Z]+)\] code:(\d+)')`
+
+### Regex Pattern Replacement (`.str.replace()`)
+
+* **Syntax:** `df['column'].str.replace(r'pattern', 'replacement', regex=True)`
+* **Explanation:** Dynamically matches complex text patterns and strips or replaces them concurrently.
+* **Example:** `df['clean_tag'] = df['raw_tag'].str.replace(r'\s\[v\d+\]', '', regex=True)`
 
 ---
 
-## 2. Missing Value Management & Memory Casting
+## 2. Missing Value Management, Performance & Memory Tuning
 
 ### Localized Null Purging (`.dropna()`)
+
 * **Syntax:** `df.dropna(subset=['column'])`
 * **Explanation:** Discards rows missing records within a specific column variable list subset.
-* **Example:** `df = df.dropna(subset=['data_gb_str'])`
+* **Example:** `df = df.dropna(subset=['timestamp_raw'])`
 
-### Single-Column Vector Conversion (`.astype()`)
+### Single-Column & Bulk Vector Conversion (`.astype()`)
+
 * **Syntax:** `df['column'].astype('datatype')`
-* **Explanation:** Recasts a column's underlying memory structure explicitly into a new primitive data type.
-* **Example:** `df['latency'] = df['latency_ms_str'].astype('float64')`
+* **Explanation:** Recasts a column's underlying memory structure explicitly into a new primitive or categorical data type.
+* **Example:** `df['cost'] = df['cost_str'].astype('float64')`
 
-### Bulk Multi-Column Dictionary Casting (`.astype(dict)`)
-* **Syntax:** `df.astype({'col1': 'type1', 'col2': 'type2'})`
-* **Explanation:** Executes multiple custom type conversions across different columns in a single operational step.
-* **Example:** `df = df.astype({'volume': 'int64', 'cost': 'float64'})`
+### High-Speed Vectorized Conditionals (`np.where()`)
+
+* **Syntax:** `np.where(condition, value_if_true, value_if_false)`
+* **Explanation:** Evaluates logic concurrently across an entire vector at the C-layer, bypassing slow Python row loops (`.apply()`).
+* **Example:** `df['status'] = np.where(df['response'] >= 400, 'ERROR', 'SUCCESS')`
+
+### Categorical Memory Compression (`astype('category')`)
+
+* **Syntax:** `df['column'] = df['column'].astype('category')`
+* **Explanation:** Replaces repetitive, low-cardinality string columns with an integer dictionary lookup, reducing RAM overhead by up to 90%.
+* **Example:** `df['region'] = df['region'].astype('category')`
+
+### Memory Footprint Diagnostics (`.memory_usage()`)
+
+* **Syntax:** `df.memory_usage(deep=True)`
+* **Explanation:** Returns the exact memory footprint allocated by each column in bytes.
+* **Example:** `bytes_used = df.memory_usage(deep=True)['region_tag']`
 
 ### Drop Columns (`.drop()`)
+
 * **Syntax:** `df.drop(columns=['column_name'])`
 * **Explanation:** Prunes administrative or unnecessary feature tracking keys horizontally from the data grid.
 * **Example:** `df = df.drop(columns=['internal_token'])`
 
 ---
 
-## 3. Layout Normalization & File Serialization
+## 3. Element Masking, Outlier Clipping & Array Unpacking
 
-### Structural Index Track Reset (`.reset_index(drop=True)`)
-* **Syntax:** `df.reset_index(drop=True)`
-* **Explanation:** Normalizes row indices sequentially starting from 0 without creating redundant column artifacts.
-* **Example:** `df_clean = df.reset_index(drop=True)`
+### Boolean Preservation & Overwriting (`.where()` / `.mask()`)
 
-### Flat Tabular Serialization (`.to_csv()`)
-* **Syntax:** `df.to_csv('filename.csv', index=False)`
-* **Explanation:** Writes a dataset to flat text dropping the row index layout numbers.
-* **Example:** `df.to_csv('warehouse_report.csv', index=False)`
+* **Syntax:** `df['col'].where(cond)` (Keeps `True`) | `df['col'].mask(cond, other)` (Replaces `True`)
+* **Explanation:** Replaces or preserves values matching boolean conditions without altering unflagged rows.
+* **Example:** `df['status'] = df['status'].mask(df['status'] >= 900, -1)`
 
-### Custom Delimiter Serialization (`sep='|'`)
-* **Syntax:** `df.to_csv('filename.txt', sep='|', index=False)`
-* **Explanation:** Exports fields separated by alternative pipe character configurations.
-* **Example:** `df.to_csv('inventory.txt', sep='|', index=False)`
+### Boundary Truncation (`.clip()`)
 
-### Streaming Telemetry Serialization (`.to_json()`)
-* **Syntax:** `df.to_json('filename.json', orient='records', indent=4)`
-* **Explanation:** Converts a tabular data matrix into a list of nested JSON object profile records.
-* **Example:** `df.to_json('stream.json', orient='records', indent=4)`
+* **Syntax:** `df['col'].clip(lower=floor_val, upper=ceiling_val)`
+* **Explanation:** Truncates numeric outliers strictly between a specified minimum floor and maximum ceiling.
+* **Example:** `df['latency_ms'] = df['latency_ms'].clip(lower=0.0, upper=500.0)`
 
----
+### Delimited String Splitting (`.str.split()`)
 
-## 4. Advanced Aggregations & Reshaping Matrices
+* **Syntax:** `df['col'].str.split('delimiter')`
+* **Explanation:** Splits text strings containing delimiters into lists of individual string elements.
+* **Example:** `df['tags_list'] = df['tags_str'].str.split(',')`
 
-### Multi-Metric Rollups (`.groupby().agg()`)
-* **Syntax:** `df.groupby('group_col').agg(new_metric=('target_col', 'function'))`
-* **Explanation:** Calculates completely different statistical operations across separate metrics simultaneously per group.
-* **Example:** `df_metrics = df.groupby('region').agg(total_gb=('data_gb', 'sum'), peak_ms=('latency', 'max')).reset_index()`
+### Unpacking Nested Arrays (`.explode()`)
 
-### Reshaping Data Layouts (`.pivot_table()`)
-* **Syntax:** `df.pivot_table(index='row_col', columns='hdr_col', values='num_col', aggfunc='sum', fill_value=0)`
-* **Explanation:** Rotates rows horizontally into columns, aggregating intersections and substituting null fields with zeroes.
-* **Example:** `df_pivot = df.pivot_table(index='year', columns='env', values='cost', aggfunc='sum', fill_value=0).reset_index()`
-
-### Cleaning Axis Title Artifacts (`.columns.name = None`)
-* **Syntax:** `df.columns.name = None`
-* **Explanation:** Wipes out floating pivoted tracking metadata text labels from the column header axis layout.
-* **Example:** `df_pivot.columns.name = None`
+* **Syntax:** `df.explode('column_name')`
+* **Explanation:** Replicates row metadata and expands each item of an embedded list into its own distinct relational row.
+* **Example:** `df_normalized = df.explode('tags_list').reset_index(drop=True)`
 
 ---
 
-## 5. Relational Lookups & Stacking Combinations
-
-### The Relational Joining Engine (`pd.merge()`)
-* **Syntax:** `pd.merge(left_df, right_df, on='shared_key', how='left')`
-* **Explanation:** Combines distinct tables horizontally based on matching keys, mimicking relational database SQL joins.
-* **Example:** `df_enriched = pd.merge(df_tx, df_regions, on='region_id', how='left')`
-
-### Asymmetric Schema Merges (`left_on` & `right_on`)
-* **Syntax:** `pd.merge(left_df, right_df, left_on='key1', right_on='key2', how='inner')`
-* **Explanation:** Aligns relational records horizontally across tables using keys with different string column labels.
-* **Example:** `df_join = pd.merge(df_users, df_storage, left_on='account_handle', right_on='user_id', how='inner')`
-
-### Vertical Telemetry Stacking (`pd.concat(axis=0)`)
-* **Syntax:** `pd.concat([df1, df2], axis=0, ignore_index=True)`
-* **Explanation:** Stacks sequential incremental batch files vertically top-to-bottom into a single tracking matrix.
-* **Example:** `df_daily = pd.concat([df_part_a, df_part_b], axis=0, ignore_index=True)`
-
-### Horizontal Component Stacking (`pd.concat(axis=1)`)
-* **Syntax:** `pd.concat([df1, df2], axis=1)`
-* **Explanation:** Combines separate equal-length feature tables horizontally side-by-side.
-* **Example:** `df_cube = pd.concat([source_metrics, forecast_metrics], axis=1)`
-
----
-
-## 6. Time Series Vector Engineering
+## 4. Time Series, Window Analytics & Numerical Ranking
 
 ### String-to-Timestamp Parsing (`pd.to_datetime()`)
+
 * **Syntax:** `pd.to_datetime(df['column'], errors='coerce')`
-* **Explanation:** Converts plain text dates into timestamp arrays, forcing unparseable text noise into null `NaT` fields.
+* **Explanation:** Converts text dates into timestamp arrays, forcing unparseable text noise into `NaT`.
 * **Example:** `df['start_time'] = pd.to_datetime(df['start_str'], errors='coerce')`
 
-### Extract Chronological Meta-Tags (`.dt` Accessor)
-* **Syntax:** `df['column'].dt.hour`
-* **Explanation:** Isolates specific numerical or string date-time properties across an entire vector layout layer.
-* **Example:** `df['start_hour_bucket'] = df['start_time'].dt.hour`
+### Row Shifting (`.shift()`)
 
-### Precise Duration Latencies (`.dt.total_seconds()`)
-* **Syntax:** `(df['end_time'] - df['start_time']).dt.total_seconds()`
-* **Explanation:** Computes full processing elapsed durations, tracking windows safely across day limits in seconds.
-* **Example:** `df['latency_seconds'] = (df['end_time'] - df['start_time']).dt.total_seconds()`
+* **Syntax:** `df['column'].shift(periods=1)` or `df.groupby('group')['col'].shift(1)`
+* **Explanation:** Shifts column vectors up or down to compare current row metrics against preceding/subsequent rows.
+* **Example:** `df['prev_time'] = df.groupby('node')['timestamp'].shift(1)`
+
+### Moving Window Calculations (`.rolling()`)
+
+* **Syntax:** `df['column'].rolling(window=size, min_periods=1).mean()`
+* **Explanation:** Creates a sliding row window to compute rolling statistics like moving averages.
+* **Example:** `df['rolling_avg'] = df['load'].rolling(window=3, min_periods=1).mean()`
+
+### Running Cumulative Totals (`.cumsum()` / `.cummax()`)
+
+* **Syntax:** `df['column'].cumsum()` / `df['column'].cummax()`
+* **Explanation:** Maintains an ongoing mathematical running tally or records historical peaks down rows.
+* **Example:** `df['running_total'] = df['cost'].cumsum()`
+
+### Positional Numerical Ranking (`.rank()`)
+
+* **Syntax:** `df['column'].rank(method='dense', ascending=False)`
+* **Explanation:** Assigns numerical positions to row values, using strategies like `dense`, `min`, or `first` to manage ties.
+* **Example:** `df['rank'] = df.groupby('cluster')['cost'].rank(method='dense', ascending=False)`
+
+---
+
+## 5. Advanced Aggregations, Reshaping & Serialization
+
+### Multi-Metric Rollups (`.groupby().agg()`)
+
+* **Syntax:** `df.groupby('group_col', observed=True).agg(new_metric=('target_col', 'function'))`
+* **Explanation:** Executes multiple custom aggregations per group (using `observed=True` for categorical efficiency).
+* **Example:** `df.groupby('region', observed=True).agg(avg_lat=('latency', 'mean'), total=('tx_id', 'count'))`
+
+### Reshaping Data Layouts (`.pivot_table()`)
+
+* **Syntax:** `df.pivot_table(index='row_col', columns='hdr_col', values='num_col', aggfunc='sum', fill_value=0.0, observed=True)`
+* **Explanation:** Rotates distinct categorical values horizontally into header columns while aggregating intersections.
+* **Example:** `df.pivot_table(index='tx_id', columns='node', values='cost', fill_value=0.0, aggfunc='sum', observed=True)`
+
+### Flat Tabular & JSON Serialization (`.to_csv()` / `.to_json()`)
+
+* **Syntax:** `df.to_csv('file.csv', index=False)` | `df.to_json('file.json', orient='records', indent=4)`
+* **Explanation:** Writes active DataFrames directly to disk as flat CSVs or nested JSON records.
+* **Example:** `df.to_csv('warehouse_report.csv', index=False)`
+
+---
+
+## 6. Relational Lookups & Stacking Combinations
+
+### The Relational Joining Engine (`pd.merge()`)
+
+* **Syntax:** `pd.merge(left_df, right_df, on='shared_key', how='left')`
+* **Explanation:** Combines distinct tables horizontally based on matching keys, mimicking SQL joins.
+* **Example:** `df_enriched = pd.merge(df_tx, df_regions, on='region_id', how='left')`
+
+### Vertical Telemetry Stacking (`pd.concat(axis=0)`)
+
+* **Syntax:** `pd.concat([df1, df2], axis=0).reset_index(drop=True)`
+* **Explanation:** Stacks sequential incremental batch files vertically top-to-bottom into a single tracking matrix.
+* **Example:** `df_daily = pd.concat([df_part_a, df_part_b], axis=0).reset_index(drop=True)`
